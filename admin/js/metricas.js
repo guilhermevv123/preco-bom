@@ -1,11 +1,19 @@
 (function (PB) {
-  var ORIGENS = { topo: "Botão do topo", final: "Botão do final da página", fixo: "Barra fixa no rodapé" };
+  var ORIGENS = {
+    "modal-grupo": "Link de um grupo (na janela)",
+    "modal-canal": "Canal do WhatsApp (na janela)",
+    telegram: "Telegram",
+    oferta: "Link de um print de oferta",
+    nav: "Abriu a janela pelo botão da barra",
+    topo: "Abriu a janela pelo botão do topo",
+    final: "Abriu a janela pelo botão do final"
+  };
+  var ENTRADAS = ["modal-grupo", "modal-canal", "telegram"];
   var msg = PB.$("#metricas-msg");
 
-  function contar(desde, origem) {
-    var q = PB.db.from("cliques").select("id", { count: "exact", head: true });
+  function contar(desde, origens) {
+    var q = PB.db.from("cliques").select("id", { count: "exact", head: true }).in("origem", origens);
     if (desde) q = q.gte("criado_em", desde.toISOString());
-    if (origem) q = q.eq("origem", origem);
     return q.then(function (r) {
       if (r.error) throw r.error;
       return r.count || 0;
@@ -31,9 +39,9 @@
 
     var totais, porOrigem, porDia;
     try {
-      totais = await Promise.all([contar(hoje), contar(diasAtras(6)), contar(diasAtras(29)), contar(null)]);
-      porOrigem = await Promise.all(Object.keys(ORIGENS).map(function (o) { return contar(diasAtras(29), o); }));
-      var r = await PB.db.rpc("cliques_por_dia", { dias: 14 });
+      totais = await Promise.all([contar(hoje, ENTRADAS), contar(diasAtras(6), ENTRADAS), contar(diasAtras(29), ENTRADAS), contar(null, ENTRADAS)]);
+      porOrigem = await Promise.all(Object.keys(ORIGENS).map(function (o) { return contar(diasAtras(29), [o]); }));
+      var r = await PB.db.rpc("cliques_por_dia", { dias: 14, origens: ENTRADAS });
       if (r.error) throw r.error;
       porDia = r.data;
     } catch (erro) {
@@ -42,7 +50,8 @@
     PB.msg(msg, "");
 
     var rotulos = ["Hoje", "Últimos 7 dias", "Últimos 30 dias", "Desde o início"];
-    PB.$("#kpis").replaceChildren.apply(PB.$("#kpis"), totais.map(function (n, i) {
+    var kpis = PB.$("#kpis");
+    kpis.replaceChildren.apply(kpis, totais.map(function (n, i) {
       return PB.el("div", { className: "kpi" }, [
         PB.el("strong", { textContent: n.toLocaleString("pt-BR") }),
         PB.el("span", { textContent: rotulos[i] })

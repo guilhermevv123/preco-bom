@@ -4,7 +4,13 @@
     return;
   }
 
-  var CARREGAR = { ofertas: PB.carregarOfertas, config: PB.carregarConfig, metricas: PB.carregarMetricas };
+  var CARREGAR = {
+    ofertas: PB.carregarOfertas,
+    grupos: PB.carregarGrupos,
+    depoimentos: PB.carregarDepoimentos,
+    config: PB.carregarConfig,
+    metricas: PB.carregarMetricas
+  };
   var recuperando = /type=recovery/.test(location.hash);
   var usuarioAtual = null;
 

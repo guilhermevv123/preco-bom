@@ -4,6 +4,15 @@ Landing page do grupo de ofertas **Preço Bom** (achadinhos do Mercado Livre no 
 
 HTML, CSS e JavaScript puros, sem etapa de build: dá para abrir o `index.html` com dois cliques e hospedar em qualquer lugar (GitHub Pages, Netlify, Vercel).
 
+## O site
+
+- Barra fixa com botão **Entrar**, herói com dois celulares mostrando ofertas e o logo.
+- Contadores animados (pessoas no grupo, ofertas por dia e, se preenchida, economia gerada) e três cards de destaque.
+- **Ofertas recentes:** cada oferta cadastrada vira um "print" de mensagem do WhatsApp (foto, preço de/por, selo de desconto, cupom e link), num carrossel com passagem automática.
+- **Depoimentos:** mensagens de quem comprou, como texto no estilo do WhatsApp ou como foto do print.
+- FAQ em sanfona, chamada final e rodapé.
+- Todos os botões de entrar abrem uma janela com o aviso de vagas, o canal (opcional) e a lista de grupos — quando um grupo lota, é só cadastrar o próximo.
+
 ## Estrutura
 
 ```
@@ -13,8 +22,8 @@ css/
   style.css             visual da página
 js/
   config.js             endereço e chave pública do Supabase
-  dados.js              ofertas e textos usados quando o banco não está ligado
-  app.js                monta o carrossel, aplica a configuração e conta os cliques
+  dados.js              conteúdo usado quando o banco não está ligado
+  app.js                monta prints, carrosséis, contadores, janela dos grupos e cliques
 assets/
   fonts/                arquivos .woff2
   img/produtos/         fotos de exemplo (WebP)
@@ -22,20 +31,22 @@ assets/
 admin/                  painel
   index.html
   admin.css
-  js/                   cliente, login, ofertas, configurações, métricas
+  js/                   cliente, login, lista genérica (crud), ofertas, grupos, depoimentos, configurações, métricas
 supabase/migrations/    tabelas, regras de acesso e conteúdo inicial
 design-original/        export do Claude Design, sem alterações
 ```
 
 ## Como funciona
 
-Sem banco configurado, o site mostra as ofertas de `js/dados.js`.
+Sem banco configurado, o site mostra o conteúdo de `js/dados.js` (os depoimentos de exemplo aparecem com o selo "exemplo").
 
-Com o Supabase ligado, o site lê as ofertas ativas e a configuração do banco, e cada toque nos botões do grupo vira um registro em `cliques`. O painel em `/admin/` permite:
+Com o Supabase ligado, o site lê tudo do banco e cada clique nos links dos grupos vira um registro em `cliques`. O painel em `/admin/` permite:
 
-- **Ofertas:** criar, editar, ocultar, reordenar e excluir. A foto é reduzida no navegador antes do envio, e o selo de desconto é calculado a partir dos dois preços.
-- **Configurações:** link do grupo (vale para os três botões), pessoas no grupo, ofertas por dia e desconto máximo.
-- **Métricas:** cliques de hoje, dos últimos 7 e 30 dias, e o total; separados por botão e por dia.
+- **Ofertas:** criar, editar, ocultar, reordenar e excluir. A foto é reduzida no navegador antes do envio; o selo de desconto é calculado a partir dos dois preços. Cupom e link são opcionais (com link, o print vira clicável).
+- **Grupos:** nome e link de convite de cada grupo do WhatsApp; os ativos aparecem na janela de entrada.
+- **Depoimentos:** nome + mensagem, ou a foto do print. Sem depoimentos, a seção fica escondida.
+- **Configurações:** pessoas no grupo, economia gerada, ofertas por dia, desconto máximo, vagas liberadas (aviso na janela), canal do WhatsApp, Telegram e ID do Pixel da Meta.
+- **Métricas:** entradas de hoje, dos últimos 7 e 30 dias e o total; por botão e por dia.
 
 ## Ligar o banco (Supabase)
 

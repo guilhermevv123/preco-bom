@@ -14,7 +14,7 @@
 <div id="sem-banco" class="aviso-tela" hidden>
   <p class="marca marca-escura">Preço <span class="bom">Bom</span></p>
   <h1>Painel ainda não conectado</h1>
-  <p>O painel precisa do banco (Supabase) para salvar ofertas e configurações. Preencha <code>supabaseUrl</code> e <code>supabaseAnonKey</code> em <code>js/config.js</code> e recarregue esta página. O passo a passo está no <code>README.md</code>.</p>
+  <p>O painel precisa do banco (Supabase) para salvar ofertas, grupos e configurações. Preencha <code>supabaseUrl</code> e <code>supabaseAnonKey</code> em <code>js/config.js</code> e recarregue esta página. O passo a passo está no <code>README.md</code>.</p>
   <p><a href="../">← Voltar para o site</a></p>
 </div>
 
@@ -44,6 +44,8 @@
     <p class="marca">Preço <span class="bom">Bom</span></p>
     <nav class="abas" role="tablist" aria-label="Seções do painel">
       <button type="button" role="tab" data-aba="ofertas">Ofertas</button>
+      <button type="button" role="tab" data-aba="grupos">Grupos</button>
+      <button type="button" role="tab" data-aba="depoimentos">Depoimentos</button>
       <button type="button" role="tab" data-aba="config">Configurações</button>
       <button type="button" role="tab" data-aba="metricas">Métricas</button>
     </nav>
@@ -57,25 +59,45 @@
   <main>
     <section id="aba-ofertas" class="aba" role="tabpanel" hidden>
       <div class="aba-topo">
-        <h1>Ofertas da vitrine</h1>
+        <h1>Ofertas recentes</h1>
         <button type="button" class="btn-primario" id="btn-nova-oferta">+ Nova oferta</button>
       </div>
-      <p class="ajuda">Aparecem no carrossel do topo do site, nesta ordem. O selo de desconto é calculado sozinho pelos dois preços.</p>
-      <ul id="lista-ofertas" class="lista-ofertas"></ul>
+      <p class="ajuda">Cada oferta vira um “print” de mensagem do WhatsApp no site, nesta ordem. As duas primeiras também aparecem nos celulares do topo. O selo de desconto é calculado sozinho pelos dois preços.</p>
+      <ul id="lista-ofertas" class="lista"></ul>
+    </section>
+
+    <section id="aba-grupos" class="aba" role="tabpanel" hidden>
+      <div class="aba-topo">
+        <h1>Grupos do WhatsApp</h1>
+        <button type="button" class="btn-primario" id="btn-novo-grupo">+ Novo grupo</button>
+      </div>
+      <p class="ajuda">Todos os botões “Entrar” do site abrem uma janela com estes grupos. Quando um grupo lota, cadastre o próximo e oculte o cheio.</p>
+      <ul id="lista-grupos" class="lista"></ul>
+    </section>
+
+    <section id="aba-depoimentos" class="aba" role="tabpanel" hidden>
+      <div class="aba-topo">
+        <h1>Depoimentos</h1>
+        <button type="button" class="btn-primario" id="btn-novo-depoimento">+ Novo depoimento</button>
+      </div>
+      <p class="ajuda">Mensagens de quem comprou pelo grupo. Pode ser o texto (vira uma mensagem no estilo do WhatsApp) ou a foto do print. Sem depoimentos cadastrados, a seção fica escondida no site.</p>
+      <ul id="lista-depoimentos" class="lista"></ul>
     </section>
 
     <section id="aba-config" class="aba" role="tabpanel" hidden>
       <h1>Configurações</h1>
       <p class="ajuda">Mudou aqui, o site muda na hora — sem mexer em código.</p>
       <form id="form-config" class="form-card" novalidate>
-        <label>Link do grupo do WhatsApp
-          <input type="url" name="grupo_link" required placeholder="https://chat.whatsapp.com/...">
-          <span class="dica">Vale para os três botões do site.</span>
-        </label>
-        <label>Pessoas no grupo
-          <input type="number" name="pessoas_no_grupo" min="0" step="1" required>
-          <span class="dica">Aparece como “5.988 pessoas já estão no grupo”.</span>
-        </label>
+        <h2 class="sub">Números do site</h2>
+        <div class="linha">
+          <label>Pessoas no grupo
+            <input type="number" name="pessoas_no_grupo" min="0" step="1" required>
+          </label>
+          <label>Economia gerada (R$)
+            <input type="text" name="economia_gerada" inputmode="decimal" placeholder="0">
+            <span class="dica">Deixe 0 para esconder o contador.</span>
+          </label>
+        </div>
         <div class="linha">
           <label>Ofertas por dia
             <input type="text" name="ofertas_por_dia" maxlength="10" required placeholder="30+">
@@ -84,6 +106,25 @@
             <input type="text" name="desconto_maximo" maxlength="10" required placeholder="65%">
           </label>
         </div>
+        <label>Vagas liberadas (aviso na janela dos grupos)
+          <input type="number" name="vagas_liberadas" min="0" max="999" step="1" required>
+          <span class="dica">Aparece como “⚡ Liberamos 12 vagas nos grupos abaixo!”. Deixe 0 para esconder.</span>
+        </label>
+
+        <h2 class="sub">Outros canais (opcionais)</h2>
+        <label>Canal do WhatsApp
+          <input type="url" name="canal_link" placeholder="https://whatsapp.com/channel/...">
+        </label>
+        <label>Telegram
+          <input type="url" name="telegram_link" placeholder="https://t.me/...">
+        </label>
+
+        <h2 class="sub">Rastreamento</h2>
+        <label>ID do Pixel da Meta
+          <input type="text" name="pixel_id" inputmode="numeric" placeholder="Só números">
+          <span class="dica">Dispara o evento “EntrarNoGrupo” a cada clique nos links dos grupos.</span>
+        </label>
+
         <button class="btn-primario" type="submit">Salvar configurações</button>
         <p class="msg" id="config-msg" role="status" aria-live="polite"></p>
       </form>
@@ -94,7 +135,7 @@
         <h1>Cliques para entrar no grupo</h1>
         <button type="button" class="btn-sec" id="btn-atualizar-metricas">Atualizar</button>
       </div>
-      <p class="ajuda">Conta cada toque em um dos botões que levam ao grupo.</p>
+      <p class="ajuda">Conta os cliques nos links dos grupos, do canal e do Telegram. A tabela por botão mostra também as aberturas da janela de grupos.</p>
       <p class="msg" id="metricas-msg" role="status" aria-live="polite"></p>
       <div class="kpis" id="kpis"></div>
       <h2 class="sub">Por botão · últimos 30 dias</h2>
@@ -104,16 +145,16 @@
       </table>
       <h2 class="sub">Por dia · últimos 14 dias</h2>
       <table class="tabela">
-        <thead><tr><th scope="col">Dia</th><th scope="col" class="num">Cliques</th></tr></thead>
+        <thead><tr><th scope="col">Dia</th><th scope="col" class="num">Entradas</th></tr></thead>
         <tbody id="tabela-dias"></tbody>
       </table>
     </section>
   </main>
 </div>
 
-<dialog id="dlg-oferta" aria-labelledby="dlg-titulo">
-  <form id="form-oferta" novalidate>
-    <h2 id="dlg-titulo">Nova oferta</h2>
+<dialog id="dlg-oferta">
+  <form novalidate>
+    <h2>Nova oferta</h2>
     <div class="foto-campo">
       <img id="foto-previa" alt="Prévia da foto do produto">
       <div>
@@ -135,10 +176,63 @@
       </label>
     </div>
     <p class="previa-desconto" id="previa-desconto"></p>
+    <label>Cupom (opcional)
+      <input type="text" name="cupom" maxlength="30" placeholder="PRECOBOM10">
+    </label>
+    <label>Link da oferta (opcional)
+      <input type="url" name="link" placeholder="https://mercadolivre.com/sec/...">
+      <span class="dica">Com o link, o print vira clicável e leva para a oferta.</span>
+    </label>
     <label class="check"><input type="checkbox" name="ativo" checked> Mostrar no site</label>
-    <p class="msg" id="oferta-msg" role="status" aria-live="polite"></p>
+    <p class="msg" role="status" aria-live="polite"></p>
     <div class="acoes">
-      <button type="button" class="btn-sec" id="dlg-cancelar">Cancelar</button>
+      <button type="button" class="btn-sec" data-cancelar>Cancelar</button>
+      <button type="submit" class="btn-primario">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-grupo">
+  <form novalidate>
+    <h2>Novo grupo</h2>
+    <label>Nome do grupo
+      <input type="text" name="nome" maxlength="40" required placeholder="Preço Bom #2">
+      <span class="dica">Aparece no botão: “Entrar no grupo Preço Bom #2”.</span>
+    </label>
+    <label>Link de convite
+      <input type="url" name="link" required placeholder="https://chat.whatsapp.com/...">
+    </label>
+    <label class="check"><input type="checkbox" name="ativo" checked> Mostrar no site</label>
+    <p class="msg" role="status" aria-live="polite"></p>
+    <div class="acoes">
+      <button type="button" class="btn-sec" data-cancelar>Cancelar</button>
+      <button type="submit" class="btn-primario">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-depoimento">
+  <form novalidate>
+    <h2>Novo depoimento</h2>
+    <label>Nome de quem mandou
+      <input type="text" name="nome" maxlength="40" required placeholder="Ana">
+    </label>
+    <label>Mensagem
+      <textarea name="texto" maxlength="300" rows="4" placeholder="Peguei a air fryer por 184, chegou hoje!"></textarea>
+    </label>
+    <div class="foto-campo">
+      <img id="depoimento-previa" alt="Prévia do print">
+      <div>
+        <label class="btn-sec">Enviar print (opcional)
+          <input type="file" name="foto" accept="image/*" hidden>
+        </label>
+        <p class="dica">Com o print, ele aparece no lugar do texto.</p>
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" name="ativo" checked> Mostrar no site</label>
+    <p class="msg" role="status" aria-live="polite"></p>
+    <div class="acoes">
+      <button type="button" class="btn-sec" data-cancelar>Cancelar</button>
       <button type="submit" class="btn-primario">Salvar</button>
     </div>
   </form>
@@ -148,7 +242,10 @@
 <script src="../js/config.js"></script>
 <script src="js/cliente.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/crud.js"></script>
 <script src="js/ofertas.js"></script>
+<script src="js/grupos.js"></script>
+<script src="js/depoimentos.js"></script>
 <script src="js/configuracoes.js"></script>
 <script src="js/metricas.js"></script>
 <script src="js/app.js"></script>

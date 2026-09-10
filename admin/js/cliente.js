@@ -2,6 +2,7 @@ window.PB = window.PB || {};
 
 (function (PB) {
   var cfg = window.PB_CONFIG || {};
+  var PASTA_PUBLICA = "/storage/v1/object/public/imagens/";
   PB.configurado = Boolean(cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase);
   if (PB.configurado) PB.db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
 
@@ -39,4 +40,37 @@ window.PB = window.PB || {};
 
   // Fotos do banco vêm com URL completa; as de exemplo são caminhos do próprio site.
   PB.imagemSrc = function (url) { return /^https?:\/\//.test(url) ? url : "../" + url; };
+
+  // Reduz a imagem para no máximo 900 px de lado, com fundo branco, antes de enviar.
+  async function reduzir(arquivo) {
+    var imagem = await createImageBitmap(arquivo);
+    var escala = Math.min(1, 900 / Math.max(imagem.width, imagem.height));
+    var tela = document.createElement("canvas");
+    tela.width = Math.round(imagem.width * escala);
+    tela.height = Math.round(imagem.height * escala);
+    var ctx = tela.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, tela.width, tela.height);
+    ctx.drawImage(imagem, 0, 0, tela.width, tela.height);
+    var gerar = function (tipo, qualidade) {
+      return new Promise(function (ok) { tela.toBlob(ok, tipo, qualidade); });
+    };
+    var blob = await gerar("image/webp", 0.82);
+    if (!blob || blob.type !== "image/webp") blob = await gerar("image/jpeg", 0.85);
+    return blob;
+  }
+
+  PB.enviarImagem = async function (arquivo, pasta) {
+    var blob = await reduzir(arquivo);
+    var extensao = blob.type === "image/webp" ? "webp" : "jpg";
+    var caminho = pasta + "/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + extensao;
+    var r = await PB.db.storage.from("imagens").upload(caminho, blob, { contentType: blob.type, cacheControl: "31536000" });
+    if (r.error) throw r.error;
+    return PB.db.storage.from("imagens").getPublicUrl(caminho).data.publicUrl;
+  };
+
+  PB.removerImagem = function (url) {
+    var i = (url || "").indexOf(PASTA_PUBLICA);
+    if (i >= 0) PB.db.storage.from("imagens").remove([url.slice(i + PASTA_PUBLICA.length)]);
+  };
 })(window.PB);
