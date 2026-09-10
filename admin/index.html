@@ -112,7 +112,11 @@
         <h2 class="sub">Rastreamento</h2>
         <label>ID do Pixel da Meta
           <input type="text" name="pixel_id" inputmode="numeric" placeholder="Só números">
-          <span class="dica">Dispara o evento “EntrarNoGrupo” a cada clique nos links dos grupos.</span>
+          <span class="dica">Dispara os eventos “Lead” e “EntrarNoGrupo” a cada clique nos links dos grupos.</span>
+        </label>
+        <label>Webhook da API de Conversões (n8n)
+          <input type="url" name="capi_webhook" placeholder="https://.../webhook/preco-bom-meta">
+          <span class="dica">Manda o mesmo clique para a Meta pelo servidor, com o mesmo ID do Pixel para não contar em dobro. Deixe vazio para desligar.</span>
         </label>
 
         <button class="btn-primario" type="submit">Salvar configurações</button>

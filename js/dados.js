@@ -8,7 +8,8 @@ window.PB_PADRAO = {
     vagas_liberadas: 12,
     canal_link: "",
     telegram_link: "",
-    pixel_id: "1010782158687635"
+    pixel_id: "1010782158687635",
+    capi_webhook: "https://meuauxiliar-n8n.nyrnfd.easypanel.host/webhook/preco-bom-meta"
   },
   grupos: [
     { nome: "Preço Bom · Grupo 34", link: "https://chat.whatsapp.com/CcPBUDarapQ4q3J2u6rAgL?s=cl&p=i&mlu=4&ilr=4" }

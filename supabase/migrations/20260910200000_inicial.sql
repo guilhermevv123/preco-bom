@@ -24,6 +24,7 @@ create table public.config (
   canal_link text check (canal_link is null or canal_link ~ '^https://(www\.)?whatsapp\.com/channel/\S+$'),
   telegram_link text check (telegram_link is null or telegram_link ~ '^https://t\.me/\S+$'),
   pixel_id text check (pixel_id is null or pixel_id ~ '^[0-9]{6,20}$'),
+  capi_webhook text check (capi_webhook is null or capi_webhook ~ '^https://\S+$'),
   atualizado_em timestamptz not null default now()
 );
 
@@ -118,8 +119,8 @@ create policy "admin apaga imagens" on storage.objects for delete to authenticat
   using (bucket_id = 'imagens' and public.is_admin());
 
 -- Conteúdo inicial, igual ao do design.
-insert into public.config (id, pessoas_no_grupo, ofertas_por_dia, desconto_maximo, vagas_liberadas, pixel_id)
-values (1, 5988, '30+', '65%', 12, '1010782158687635');
+insert into public.config (id, pessoas_no_grupo, ofertas_por_dia, desconto_maximo, vagas_liberadas, pixel_id, capi_webhook)
+values (1, 5988, '30+', '65%', 12, '1010782158687635', 'https://meuauxiliar-n8n.nyrnfd.easypanel.host/webhook/preco-bom-meta');
 
 insert into public.grupos (nome, link, ordem)
 values ('Preço Bom · Grupo 34', 'https://chat.whatsapp.com/CcPBUDarapQ4q3J2u6rAgL?s=cl&p=i&mlu=4&ilr=4', 0);

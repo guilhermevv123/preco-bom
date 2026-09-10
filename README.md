@@ -44,8 +44,13 @@ Com o Supabase ligado, o site lê tudo do banco e cada clique nos links dos grup
 
 - **Ofertas:** criar, editar, ocultar, reordenar e excluir. A foto é reduzida no navegador antes do envio; o selo de desconto é calculado a partir dos dois preços. Cupom e link são opcionais (com link, o print vira clicável).
 - **Grupos:** nome e link de convite de cada grupo do WhatsApp; os ativos aparecem na janela de entrada.
-- **Configurações:** pessoas no grupo, economia gerada, ofertas por dia, desconto máximo, vagas liberadas (aviso na janela), canal do WhatsApp, Telegram e ID do Pixel da Meta.
+- **Configurações:** pessoas no grupo, economia gerada, ofertas por dia, desconto máximo, vagas liberadas (aviso na janela), canal do WhatsApp, Telegram, ID do Pixel da Meta e webhook da API de Conversões.
 - **Métricas:** entradas de hoje, dos últimos 7 e 30 dias e o total; por botão e por dia.
+
+## Rastreamento da Meta
+
+- **Pixel (navegador):** com o ID em Configurações, o site dispara `PageView` ao abrir e `Lead` + `EntrarNoGrupo` a cada clique nos links dos grupos, do canal ou do Telegram.
+- **API de Conversões (servidor):** o mesmo clique é enviado ao webhook configurado (um fluxo do n8n, "Preço Bom · Meta Conversions API"), que repassa para a Meta com IP, user agent, `_fbp`/`_fbc` e o mesmo `event_id` do Pixel — a Meta junta os dois e conta uma vez só. O token de acesso fica guardado só na credencial do n8n; nunca no site nem neste repositório.
 
 ## Ligar o banco (Supabase)
 

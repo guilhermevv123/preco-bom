@@ -1,7 +1,7 @@
 (function (PB) {
   var form = PB.$("#form-config");
   var msg = PB.$("#config-msg");
-  var CAMPOS = ["pessoas_no_grupo", "economia_gerada", "ofertas_por_dia", "desconto_maximo", "vagas_liberadas", "canal_link", "telegram_link", "pixel_id"];
+  var CAMPOS = ["pessoas_no_grupo", "economia_gerada", "ofertas_por_dia", "desconto_maximo", "vagas_liberadas", "canal_link", "telegram_link", "pixel_id", "capi_webhook"];
   var LINK_CANAL = /^https:\/\/(www\.)?whatsapp\.com\/channel\/\S+$/;
   var LINK_TELEGRAM = /^https:\/\/t\.me\/\S+$/;
 
@@ -28,6 +28,7 @@
       canal_link: form.elements.canal_link.value.trim() || null,
       telegram_link: form.elements.telegram_link.value.trim() || null,
       pixel_id: form.elements.pixel_id.value.trim() || null,
+      capi_webhook: form.elements.capi_webhook.value.trim() || null,
       atualizado_em: new Date().toISOString()
     };
     if (!(dados.pessoas_no_grupo >= 0)) return PB.msg(msg, "Digite quantas pessoas estão no grupo.", "erro");
@@ -37,6 +38,7 @@
     if (dados.canal_link && !LINK_CANAL.test(dados.canal_link)) return PB.msg(msg, "O canal precisa começar com https://whatsapp.com/channel/", "erro");
     if (dados.telegram_link && !LINK_TELEGRAM.test(dados.telegram_link)) return PB.msg(msg, "O Telegram precisa começar com https://t.me/", "erro");
     if (dados.pixel_id && !/^\d{6,20}$/.test(dados.pixel_id)) return PB.msg(msg, "O ID do Pixel tem só números (de 6 a 20 dígitos).", "erro");
+    if (dados.capi_webhook && !/^https:\/\/\S+$/.test(dados.capi_webhook)) return PB.msg(msg, "O webhook precisa começar com https://", "erro");
 
     var botao = form.querySelector("[type=submit]");
     botao.disabled = true;

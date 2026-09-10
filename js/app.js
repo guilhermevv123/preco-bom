@@ -9,6 +9,7 @@
   var HORAS_EXEMPLO = ["09:12", "11:47", "14:05", "16:31", "18:41", "20:16"];
   var reduzMovimento = matchMedia("(prefers-reduced-motion: reduce)").matches;
   var membros = "";
+  var configAtual = {};
 
   function el(tag, classe, texto) {
     var e = document.createElement(tag);
@@ -159,6 +160,7 @@
   }
 
   function aplicarConfig(c) {
+    configAtual = c;
     membros = Number(c.pessoas_no_grupo).toLocaleString("pt-BR");
     texto("[data-desconto]", c.desconto_maximo);
     document.querySelector("[data-kpi-pessoas]").dataset.value = Number(c.pessoas_no_grupo) || 0;
@@ -310,10 +312,34 @@
     });
   }
 
+  function cookie(nome) {
+    var m = document.cookie.match("(?:^|; )" + nome + "=([^;]*)");
+    return m ? decodeURIComponent(m[1]) : "";
+  }
+
+  // Manda o mesmo evento para a API de Conversões (via webhook do n8n), com o event_id do Pixel para a Meta não contar duas vezes.
+  function servidorMeta(origem, id) {
+    var url = configAtual.capi_webhook || "";
+    if (!LINK_HTTPS.test(url)) return;
+    var fbc = cookie("_fbc");
+    if (!fbc) {
+      var fbclid = new URLSearchParams(location.search).get("fbclid");
+      if (fbclid) fbc = "fb.1." + Date.now() + "." + fbclid;
+    }
+    var corpo = JSON.stringify({ event_name: "Lead", event_id: id, url: location.href, origem: origem, fbp: cookie("_fbp"), fbc: fbc });
+    if (navigator.sendBeacon) navigator.sendBeacon(url, corpo);
+    else fetch(url, { method: "POST", body: corpo, keepalive: true, mode: "no-cors" }).catch(function () {});
+  }
+
   function registrar(origem) {
-    if (window.fbq && origem !== "nav" && origem !== "topo" && origem !== "final") {
-      fbq("track", "Lead", { content_name: origem });
-      fbq("trackCustom", "EntrarNoGrupo", { origem: origem });
+    var entrada = origem !== "nav" && origem !== "topo" && origem !== "final";
+    if (entrada) {
+      var id = window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+      if (window.fbq) {
+        fbq("track", "Lead", { content_name: origem }, { eventID: id });
+        fbq("trackCustom", "EntrarNoGrupo", { origem: origem });
+      }
+      servidorMeta(origem, id);
     }
     if (!temBanco) return;
     api("cliques", {
@@ -336,7 +362,7 @@
   function carregar() {
     if (!temBanco) return montar(padrao);
     Promise.all([
-      api("config?id=eq.1&select=pessoas_no_grupo,economia_gerada,ofertas_por_dia,desconto_maximo,vagas_liberadas,canal_link,telegram_link,pixel_id"),
+      api("config?id=eq.1&select=pessoas_no_grupo,economia_gerada,ofertas_por_dia,desconto_maximo,vagas_liberadas,canal_link,telegram_link,pixel_id,capi_webhook"),
       api("grupos?ativo=eq.true&select=nome,link&order=ordem.asc,criado_em.asc"),
       api("ofertas?ativo=eq.true&select=titulo,imagem_url,preco_de,preco_por,cupom,link,criado_em&order=ordem.asc,criado_em.asc")
     ]).then(function (r) {
