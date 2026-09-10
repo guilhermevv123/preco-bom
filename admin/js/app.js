@@ -7,7 +7,6 @@
   var CARREGAR = {
     ofertas: PB.carregarOfertas,
     grupos: PB.carregarGrupos,
-    depoimentos: PB.carregarDepoimentos,
     config: PB.carregarConfig,
     metricas: PB.carregarMetricas
   };

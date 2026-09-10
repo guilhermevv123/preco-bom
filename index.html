@@ -11,8 +11,6 @@
 <meta property="og:title" content="Preço Bom · Achadinhos do Mercado Livre no WhatsApp">
 <meta property="og:description" content="Dezenas de ofertas todos os dias, com até 65% off. Entre no grupo gratuito.">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="assets/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -42,7 +40,6 @@
     </a>
     <div class="topbar-links">
       <a href="#ofertas">Ofertas</a>
-      <a href="#depoimentos">Depoimentos</a>
       <a href="#duvidas">Dúvidas</a>
     </div>
     <button type="button" class="btn btn-whatsapp btn-sm" data-grupo="nav"><svg class="ic"><use href="#i-wa"/></svg> Entrar</button>
@@ -50,7 +47,7 @@
 </nav>
 
 <header id="top" class="hero container">
-  <div class="hero-art" aria-hidden="true">
+  <div class="hero-art entrada" aria-hidden="true">
     <div class="phone phone-left" id="phone-1"></div>
     <div class="wordmark">
       <svg class="wordmark-icon"><use href="#i-tag"/></svg>
@@ -60,43 +57,43 @@
     <div class="phone phone-right" id="phone-2"></div>
   </div>
 
-  <h1 class="headline">Dezenas de achadinhos todos os dias</h1>
-  <p class="lead">Ofertas do Mercado Livre com até <strong data-desconto>65%</strong> de desconto, direto no seu WhatsApp. Entre no grupo e não perca nenhum achado.</p>
+  <h1 class="headline entrada" style="--atraso: 0.15s">Dezenas de achadinhos todos os dias</h1>
+  <p class="lead entrada" style="--atraso: 0.3s">Ofertas do Mercado Livre com até <strong data-desconto>65%</strong> de desconto, direto no seu WhatsApp. Entre no grupo e não perca nenhum achado.</p>
 
-  <div class="cta-row">
+  <div class="cta-row entrada" style="--atraso: 0.45s">
     <button type="button" class="btn btn-whatsapp btn-cta" data-grupo="topo"><svg class="ic"><use href="#i-wa"/></svg> Entrar no grupo do WhatsApp</button>
     <a class="btn btn-telegram btn-cta" data-telegram hidden href="#" target="_blank" rel="noopener nofollow" data-entrar="telegram"><svg class="ic"><use href="#i-tg"/></svg> Ofertas no Telegram</a>
     <a class="btn btn-yellow btn-cta" href="#ofertas">🔥 Ver ofertas de hoje</a>
   </div>
 
-  <div class="metrics-band">
+  <div class="metrics-band entrada" style="--atraso: 0.6s">
     <div class="kpis">
-      <div class="kpi" data-kpi-economia hidden>
+      <div class="kpi reveal" data-kpi-economia hidden>
         <svg class="kpi-icon"><use href="#i-percent"/></svg>
         <strong class="counter" data-prefix="R$ " data-decimals="2" data-value="0">R$ 0,00</strong>
         <small>Economia gerada pela comunidade</small>
       </div>
-      <div class="kpi">
+      <div class="kpi reveal">
         <svg class="kpi-icon"><use href="#i-users"/></svg>
         <strong class="counter" data-kpi-pessoas data-suffix="+" data-value="0">0</strong>
         <small>Pessoas no grupo de ofertas</small>
       </div>
-      <div class="kpi">
+      <div class="kpi reveal" style="--atraso: 0.12s">
         <svg class="kpi-icon kpi-icon-amarelo"><use href="#i-bolt"/></svg>
         <strong class="counter" data-kpi-ofertas data-suffix="+" data-value="0">0</strong>
         <small>Ofertas novas por dia</small>
       </div>
     </div>
     <div class="features">
-      <div class="card-glass feature">
+      <div class="card-glass feature reveal">
         <h3><svg class="ic ic-amarelo"><use href="#i-bolt"/></svg> Cupons acabam rápido</h3>
         <p>Receba o alerta assim que pintar e garanta antes de esgotar.</p>
       </div>
-      <div class="card-glass feature">
+      <div class="card-glass feature reveal" style="--atraso: 0.12s">
         <h3><svg class="ic ic-azul"><use href="#i-bell"/></svg> Ofertas em tempo real</h3>
         <p>Sem enrolação: produto, preço de antes, preço de agora e link direto.</p>
       </div>
-      <div class="card-glass feature">
+      <div class="card-glass feature reveal" style="--atraso: 0.24s">
         <h3><svg class="ic ic-verde"><use href="#i-shield"/></svg> Só o que está barato de verdade</h3>
         <p>Garimpamos o dia inteiro. Se não vale a pena, não entra no grupo.</p>
       </div>
@@ -104,12 +101,18 @@
   </div>
 </header>
 
+<div class="faixa-wrap" aria-hidden="true">
+  <div class="faixa">
+    <div class="faixa-trilho" id="faixa"></div>
+  </div>
+</div>
+
 <section id="ofertas" class="section container">
-  <div class="section-head">
+  <div class="section-head reveal">
     <h2>Ofertas recentes</h2>
     <p>Prints das promoções mais quentes que saíram no grupo.</p>
   </div>
-  <div class="carousel" data-carousel>
+  <div class="carousel reveal" data-carousel>
     <button type="button" class="car-btn car-prev" aria-label="Anterior"><svg class="ic"><use href="#i-seta"/></svg></button>
     <div class="car-track" id="track-ofertas"></div>
     <button type="button" class="car-btn car-next" aria-label="Próximo"><svg class="ic"><use href="#i-seta"/></svg></button>
@@ -117,22 +120,9 @@
   </div>
 </section>
 
-<section id="depoimentos" class="section container">
-  <div class="section-head">
-    <h2>Depoimentos</h2>
-    <p>Prints reais da galera economizando com o Preço Bom.</p>
-  </div>
-  <div class="carousel" data-carousel>
-    <button type="button" class="car-btn car-prev" aria-label="Anterior"><svg class="ic"><use href="#i-seta"/></svg></button>
-    <div class="car-track" id="track-depoimentos"></div>
-    <button type="button" class="car-btn car-next" aria-label="Próximo"><svg class="ic"><use href="#i-seta"/></svg></button>
-    <div class="car-dots" role="tablist" aria-label="Depoimentos"></div>
-  </div>
-</section>
-
 <section id="duvidas" class="section container">
   <div class="grid-2">
-    <div class="card-glass faq">
+    <div class="card-glass faq reveal">
       <h3>Perguntas rápidas</h3>
       <details open>
         <summary>Vocês vendem alguma coisa?</summary>
@@ -155,7 +145,7 @@
         <p>Pode. É só sair do grupo pelo WhatsApp, sem burocracia.</p>
       </details>
     </div>
-    <div class="final">
+    <div class="final reveal" style="--atraso: 0.12s">
       <h3>Pronto para economizar?</h3>
       <p>Entre agora e receba as melhores oportunidades primeiro.</p>
       <div class="cta-col">

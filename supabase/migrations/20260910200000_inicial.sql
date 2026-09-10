@@ -1,4 +1,4 @@
--- Preço Bom: configuração do site, grupos do WhatsApp, ofertas, depoimentos, cliques e administradores.
+-- Preço Bom: configuração do site, grupos do WhatsApp, ofertas, cliques e administradores.
 
 create table public.admins (
   email text primary key check (email = lower(email))
@@ -49,17 +49,6 @@ create table public.ofertas (
   criado_em timestamptz not null default now()
 );
 
-create table public.depoimentos (
-  id uuid primary key default gen_random_uuid(),
-  nome text not null check (char_length(nome) between 1 and 40),
-  texto text check (texto is null or char_length(texto) between 1 and 300),
-  imagem_url text,
-  ordem int not null default 0,
-  ativo boolean not null default true,
-  criado_em timestamptz not null default now(),
-  check (texto is not null or imagem_url is not null)
-);
-
 create table public.cliques (
   id bigint generated always as identity primary key,
   origem text not null check (origem in ('nav', 'topo', 'final', 'modal-grupo', 'modal-canal', 'telegram', 'oferta')),
@@ -87,7 +76,6 @@ alter table public.admins enable row level security;
 alter table public.config enable row level security;
 alter table public.grupos enable row level security;
 alter table public.ofertas enable row level security;
-alter table public.depoimentos enable row level security;
 alter table public.cliques enable row level security;
 
 create policy "admin vê admins" on public.admins for select to authenticated using (public.is_admin());
@@ -105,24 +93,19 @@ create policy "admin cria ofertas" on public.ofertas for insert to authenticated
 create policy "admin altera ofertas" on public.ofertas for update to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy "admin apaga ofertas" on public.ofertas for delete to authenticated using (public.is_admin());
 
-create policy "todos leem depoimentos ativos" on public.depoimentos for select to anon, authenticated using (ativo or public.is_admin());
-create policy "admin cria depoimentos" on public.depoimentos for insert to authenticated with check (public.is_admin());
-create policy "admin altera depoimentos" on public.depoimentos for update to authenticated using (public.is_admin()) with check (public.is_admin());
-create policy "admin apaga depoimentos" on public.depoimentos for delete to authenticated using (public.is_admin());
-
 create policy "todos registram cliques" on public.cliques for insert to anon, authenticated with check (true);
 create policy "admin vê cliques" on public.cliques for select to authenticated using (public.is_admin());
 
-grant select on public.config, public.grupos, public.ofertas, public.depoimentos to anon, authenticated;
+grant select on public.config, public.grupos, public.ofertas to anon, authenticated;
 grant update on public.config to authenticated;
-grant insert, update, delete on public.grupos, public.ofertas, public.depoimentos to authenticated;
+grant insert, update, delete on public.grupos, public.ofertas to authenticated;
 grant insert on public.cliques to anon, authenticated;
 grant select on public.cliques, public.admins to authenticated;
 revoke execute on function public.cliques_por_dia(int, text[]) from public, anon;
 grant execute on function public.cliques_por_dia(int, text[]) to authenticated;
 grant execute on function public.is_admin() to anon, authenticated;
 
--- Imagens (fotos de produto e prints): leitura pública, envio só por administradores.
+-- Fotos de produto: leitura pública, envio só por administradores.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('imagens', 'imagens', true, 3145728, array['image/webp', 'image/jpeg', 'image/png'])
 on conflict (id) do nothing;
@@ -135,11 +118,11 @@ create policy "admin apaga imagens" on storage.objects for delete to authenticat
   using (bucket_id = 'imagens' and public.is_admin());
 
 -- Conteúdo inicial, igual ao do design.
-insert into public.config (id, pessoas_no_grupo, ofertas_por_dia, desconto_maximo, vagas_liberadas)
-values (1, 5988, '30+', '65%', 12);
+insert into public.config (id, pessoas_no_grupo, ofertas_por_dia, desconto_maximo, vagas_liberadas, pixel_id)
+values (1, 5988, '30+', '65%', 12, '1010782158687635');
 
 insert into public.grupos (nome, link, ordem)
-values ('Preço Bom #1', 'https://chat.whatsapp.com/CcPBUDarapQ4q3J2u6rAgL?s=cl&p=i&mlu=4&ilr=4', 0);
+values ('Preço Bom · Grupo 34', 'https://chat.whatsapp.com/CcPBUDarapQ4q3J2u6rAgL?s=cl&p=i&mlu=4&ilr=4', 0);
 
 insert into public.ofertas (titulo, imagem_url, preco_de, preco_por, ordem) values
   ('Smart TV TCL 50" 4K Google TV', 'assets/img/produtos/tv.webp', 2299, 873, 0),

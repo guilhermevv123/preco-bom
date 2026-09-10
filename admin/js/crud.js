@@ -1,4 +1,4 @@
-// Lista com criar, editar, ocultar, reordenar e excluir — a mesma mecânica para ofertas, grupos e depoimentos.
+// Lista com criar, editar, ocultar, reordenar e excluir — a mesma mecânica para ofertas e grupos.
 (function (PB) {
   PB.crud = function (op) {
     var ul = PB.$(op.lista);

@@ -40,12 +40,11 @@
     return span;
   }
 
-  function topoPrint(subtitulo, exemplo) {
+  function topoPrint(subtitulo) {
     var topo = el("div", "print-top");
     var nomes = el("div");
     nomes.append(el("b", null, "Preço Bom 🛒"), el("small", null, subtitulo));
     topo.append(el("span", "avatar", "PB"), nomes);
-    if (exemplo) topo.append(el("span", "exemplo", "exemplo"));
     return topo;
   }
 
@@ -91,25 +90,6 @@
     return raiz;
   }
 
-  function printDepoimento(d, indice) {
-    var raiz = el("article", "print print--curto");
-    raiz.append(topoPrint("grupo de ofertas", d.exemplo));
-    if (LINK_HTTPS.test(d.imagem_url || "") || /^assets\//.test(d.imagem_url || "")) {
-      var img = el("img", "print-img");
-      img.src = d.imagem_url;
-      img.alt = "Print de " + d.nome;
-      img.loading = "lazy";
-      raiz.append(img);
-      return raiz;
-    }
-    var chat = el("div", "print-chat");
-    var msg = el("div", "msg msg-in");
-    msg.append(el("b", "msg-from", "~ " + d.nome), el("p", "msg-texto", d.texto), horario(d.criado_em, indice));
-    chat.append(el("span", "chip", "Hoje"), msg);
-    raiz.append(chat);
-    return raiz;
-  }
-
   function montarOfertas(ofertas) {
     var trilho = document.getElementById("track-ofertas");
     var secao = document.getElementById("ofertas");
@@ -128,16 +108,33 @@
     carrossel(secao.querySelector("[data-carousel]"));
   }
 
-  function montarDepoimentos(lista) {
-    var secao = document.getElementById("depoimentos");
-    if (!lista.length) {
-      secao.hidden = true;
-      document.querySelector('.topbar-links a[href="#depoimentos"]').hidden = true;
+  function montarFaixa(c) {
+    var itens = [
+      "🔥 Mais de " + (parseInt(c.ofertas_por_dia, 10) || c.ofertas_por_dia) + " ofertas por dia",
+      "💸 Até " + c.desconto_maximo + " de desconto",
+      "✅ 100% grátis, sem cadastro",
+      "🛒 Só links do Mercado Livre",
+      "⚡ Cupons antes de acabar"
+    ];
+    var trilho = document.getElementById("faixa");
+    // A faixa anda metade do trilho e recomeça, então o conteúdo vai duas vezes.
+    trilho.replaceChildren.apply(trilho, itens.concat(itens).map(function (t) { return el("span", null, t); }));
+  }
+
+  function revelar() {
+    var alvos = document.querySelectorAll(".reveal, .print");
+    if (reduzMovimento || !("IntersectionObserver" in window)) {
+      alvos.forEach(function (a) { a.classList.add("visivel"); });
       return;
     }
-    var trilho = document.getElementById("track-depoimentos");
-    trilho.replaceChildren.apply(trilho, lista.map(printDepoimento));
-    carrossel(secao.querySelector("[data-carousel]"));
+    var io = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (x) {
+        if (!x.isIntersecting) return;
+        x.target.classList.add("visivel");
+        io.unobserve(x.target);
+      });
+    }, { threshold: 0.2 });
+    alvos.forEach(function (a) { io.observe(a); });
   }
 
   function montarGrupos(grupos) {
@@ -315,6 +312,7 @@
 
   function registrar(origem) {
     if (window.fbq && origem !== "nav" && origem !== "topo" && origem !== "final") {
+      fbq("track", "Lead", { content_name: origem });
       fbq("trackCustom", "EntrarNoGrupo", { origem: origem });
     }
     if (!temBanco) return;
@@ -328,10 +326,11 @@
 
   function montar(dados) {
     aplicarConfig(dados.config);
+    montarFaixa(dados.config);
     montarGrupos(dados.grupos);
     montarOfertas(dados.ofertas);
-    montarDepoimentos(dados.depoimentos);
     contadores();
+    revelar();
   }
 
   function carregar() {
@@ -339,10 +338,9 @@
     Promise.all([
       api("config?id=eq.1&select=pessoas_no_grupo,economia_gerada,ofertas_por_dia,desconto_maximo,vagas_liberadas,canal_link,telegram_link,pixel_id"),
       api("grupos?ativo=eq.true&select=nome,link&order=ordem.asc,criado_em.asc"),
-      api("ofertas?ativo=eq.true&select=titulo,imagem_url,preco_de,preco_por,cupom,link,criado_em&order=ordem.asc,criado_em.asc"),
-      api("depoimentos?ativo=eq.true&select=nome,texto,imagem_url,criado_em&order=ordem.asc,criado_em.asc")
+      api("ofertas?ativo=eq.true&select=titulo,imagem_url,preco_de,preco_por,cupom,link,criado_em&order=ordem.asc,criado_em.asc")
     ]).then(function (r) {
-      montar({ config: r[0][0] || padrao.config, grupos: r[1], ofertas: r[2], depoimentos: r[3] });
+      montar({ config: r[0][0] || padrao.config, grupos: r[1], ofertas: r[2] });
     }).catch(function () { montar(padrao); });
   }
 
